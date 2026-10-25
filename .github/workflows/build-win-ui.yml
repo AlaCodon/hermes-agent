@@ -1,0 +1,26 @@
+name: Build Windows UI Only
+on:
+  workflow_dispatch:
+
+jobs:
+  build-win-ui:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+           fetch-depth: 1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 26
+      - name: Install and Pack UI
+        run: |
+          node -e "const fs = require('fs'); const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8')); pkg.overrides = pkg.overrides || {}; pkg.overrides['undici@^6'] = '6.29.1'; pkg.overrides['undici@^7'] = '7.30.1'; pkg.overrides['zod'] = '4.6.7'; fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2))"
+          npm install --min-release-age=0
+          npm audit fix --min-release-age=0
+          cd apps/desktop
+          npm run pack
+      - name: Upload Windows Unpacked Zip
+        uses: actions/upload-artifact@v7
+        with:
+          name: Hermes-Windows-UI
+          path: apps/desktop/release/win-unpacked
