@@ -1,10 +1,19 @@
 name: Build Windows UI Only
 on:
   workflow_dispatch:
+    inputs:
+      runon:
+        description: 'Windows architecture'
+        type: choice
+        required: true
+        default: windows-latest
+        options:
+          - windows-latest
+          - windows-11-arm
 
 jobs:
   build-win-ui:
-    runs-on: windows-latest
+    runs-on: ${{ inputs.runon }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -22,5 +31,5 @@ jobs:
       - name: Upload Windows Unpacked Zip
         uses: actions/upload-artifact@v7
         with:
-          name: Hermes-Windows-UI
+          name: Hermes-Windows-UI-${{ inputs.runon }}
           path: apps/desktop/release/win-unpacked
